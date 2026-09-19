@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "3e076b8e-5e31-81f4-9857-d93ffceaf1d1",
+    "url": "https://www.notion.so/p/3e076b8e5e3181f49857d93ffceaf1d1",
+    "versionId": "584fdcb91de53f3141774d40af003b9cf93550c56237aa6494931e1d835d8646"
+  },
+  "plugin": {
+    "slug": "document-review-2",
+    "name": "Document Review"
+  }
+}

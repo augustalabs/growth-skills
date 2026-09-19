@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notion Task Breakdown"
+  short_description: "Break Growth tasks into Notion subtasks"
+  default_prompt: "Use $notion-task-breakdown to break this Growth task into clear Notion subtasks."

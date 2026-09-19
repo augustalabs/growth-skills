@@ -1,0 +1,5 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "document-review",
+	"description": "Reviews documents for clarity, completeness, and consistency. Suggests improvements and flags potential issues."
+}

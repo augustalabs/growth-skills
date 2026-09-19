@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "3e076b8e-5e31-816d-bb0f-dc68f819c81a",
+    "url": "https://www.notion.so/p/3e076b8e5e31816dbb0fdc68f819c81a",
+    "versionId": "0c953f5924fde0f426d35eedc6081847c7ac292401a74f48a214904246d0a368"
+  },
+  "plugin": {
+    "slug": "ad-hoc-request",
+    "name": "ad-hoc-request"
+  }
+}

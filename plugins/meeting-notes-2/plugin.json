@@ -1,0 +1,5 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "meeting-notes",
+	"description": "Helps structure and summarize meeting notes, capturing key decisions, action items, and follow-ups."
+}

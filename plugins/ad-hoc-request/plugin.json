@@ -1,0 +1,5 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "ad-hoc-request",
+	"description": "Complete an ad hoc Growth request end-to-end in one pass, produce the requested output, and log the finished work in the Augusta Labs Growth ad hoc requests database. Use when someone invokes this skill with a request to execute; do not use for ordinary task planning or status updates."
+}

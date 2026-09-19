@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ad Hoc Request"
+  short_description: "Complete and log ad hoc Growth requests"
+  default_prompt: "Use $ad-hoc-request to complete this request end-to-end and log it in the Growth database."

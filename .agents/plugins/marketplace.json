@@ -1,0 +1,92 @@
+{
+  "name": "skills",
+  "interface": {
+    "displayName": "Skills"
+  },
+  "plugins": [
+    {
+      "name": "ad-hoc-request",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ad-hoc-request"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "document-review",
+      "source": {
+        "source": "local",
+        "path": "./plugins/document-review"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "document-review-2",
+      "source": {
+        "source": "local",
+        "path": "./plugins/document-review-2"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "meeting-notes",
+      "source": {
+        "source": "local",
+        "path": "./plugins/meeting-notes"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "meeting-notes-2",
+      "source": {
+        "source": "local",
+        "path": "./plugins/meeting-notes-2"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "notion-skills-updater",
+      "source": {
+        "source": "local",
+        "path": "./plugins/notion-skills-updater"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "notion-task-breakdown",
+      "source": {
+        "source": "local",
+        "path": "./plugins/notion-task-breakdown"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

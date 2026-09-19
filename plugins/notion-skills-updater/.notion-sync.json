@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "9933adb2-7e72-427c-a5d7-cb2971ee09e8",
+    "url": "https://www.notion.so/p/9933adb27e72427ca5d7cb2971ee09e8",
+    "versionId": "ae8fb08ea2db7cab35fab28208b23bf0c3abd34f76c5db4be578d4ece2d841d8"
+  },
+  "plugin": {
+    "slug": "notion-skills-updater",
+    "name": "notion-skills-updater"
+  }
+}

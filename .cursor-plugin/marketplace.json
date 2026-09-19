@@ -1,0 +1,46 @@
+{
+  "name": "skills",
+  "owner": {
+    "name": "Skills Team"
+  },
+  "metadata": {
+    "description": "Skills synced from Notion."
+  },
+  "plugins": [
+    {
+      "name": "ad-hoc-request",
+      "source": "./plugins/ad-hoc-request",
+      "description": "Complete an ad hoc Growth request end-to-end in one pass, produce the requested output, and log the finished work in the Augusta Labs Growth ad hoc requests database. Use when someone invokes this skill with a request to execute; do not use for ordinary task planning or status updates."
+    },
+    {
+      "name": "document-review",
+      "source": "./plugins/document-review",
+      "description": "Reviews documents for clarity, completeness, and consistency. Suggests improvements and flags potential issues."
+    },
+    {
+      "name": "document-review-2",
+      "source": "./plugins/document-review-2",
+      "description": "Reviews documents for clarity, completeness, and consistency. Suggests improvements and flags potential issues."
+    },
+    {
+      "name": "meeting-notes",
+      "source": "./plugins/meeting-notes",
+      "description": "Helps structure and summarize meeting notes, capturing key decisions, action items, and follow-ups."
+    },
+    {
+      "name": "meeting-notes-2",
+      "source": "./plugins/meeting-notes-2",
+      "description": "Helps structure and summarize meeting notes, capturing key decisions, action items, and follow-ups."
+    },
+    {
+      "name": "notion-skills-updater",
+      "source": "./plugins/notion-skills-updater",
+      "description": "Edit or create skills by updating their source in Notion (write-back via the Notion MCP)."
+    },
+    {
+      "name": "notion-task-breakdown",
+      "source": "./plugins/notion-task-breakdown",
+      "description": "Break an existing Augusta Labs Growth task into actionable subtasks and write the approved breakdown to the Growth tasks database in Notion. Use while Guilherme Brandão is planning or decomposing Growth work; do not use for generic status reports or unrelated Notion pages."
+    }
+  ]
+}

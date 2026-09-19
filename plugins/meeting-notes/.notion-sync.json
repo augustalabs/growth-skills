@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "3e076b8e-5e31-8151-828e-c5e47706fd74",
+    "url": "https://www.notion.so/p/3e076b8e5e318151828ec5e47706fd74",
+    "versionId": "fe73ebfb743332a730f4786d12fc6449816060691dcef5c0ea174db8115f8045"
+  },
+  "plugin": {
+    "slug": "meeting-notes",
+    "name": "Meeting Notes"
+  }
+}

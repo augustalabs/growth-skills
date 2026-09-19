@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "notion-task-breakdown",
+  "description": "Break an existing Augusta Labs Growth task into actionable subtasks and write the approved breakdown to the Growth tasks database in Notion. Use while Guilherme Brandão is planning or decomposing Growth work; do not use for generic status reports or unrelated Notion pages.",
+  "version": "1.0.0",
+  "author": {
+    "name": "notion-task-breakdown"
+  }
+}

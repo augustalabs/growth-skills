@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "3e076b8e-5e31-811b-9b87-fec70db74c28",
+    "url": "https://www.notion.so/p/3e076b8e5e31811b9b87fec70db74c28",
+    "versionId": "daedd5b84bc0266176dd9f3f8b1e421f864159e55f389240a2819349eb727a39"
+  },
+  "plugin": {
+    "slug": "notion-task-breakdown",
+    "name": "notion-task-breakdown"
+  }
+}
