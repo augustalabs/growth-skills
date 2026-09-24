@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deck Logos"
+  short_description: "Find and pick company logos for Augusta decks"
+  default_prompt: "Use $deck-logos to find the logos for this deck's companies."

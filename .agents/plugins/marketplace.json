@@ -17,6 +17,18 @@
       "category": "Productivity"
     },
     {
+      "name": "decks",
+      "source": {
+        "source": "local",
+        "path": "./plugins/decks"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "document-review",
       "source": {
         "source": "local",

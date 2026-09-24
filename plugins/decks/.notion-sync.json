@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "a2635e88-29c9-4027-8fa9-13a7f9f56a32",
+    "url": "https://www.notion.so/p/a2635e8829c940278fa913a7f9f56a32",
+    "versionId": "ac1d95008c095692de3bf214e938d4886d0490bac4e1e805e057b8487007ce5f"
+  },
+  "plugin": {
+    "slug": "decks",
+    "name": "Decks"
+  }
+}
