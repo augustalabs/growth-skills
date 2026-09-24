@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["pillow>=11", "playwright>=1.48"]
+# dependencies = ["pillow>=11", "playwright>=1.48", "numpy>=1.26", "scipy>=1.11"]
 # ///
 """Logo candidates for Augusta decks: find them, clean them, show them, pick one.
 
@@ -27,11 +27,21 @@ Every candidate is then checked on its rendered pixels. Blocking flags:
   busy_background   the border isn't one flat colour, keying it out eats the mark
   solid_block       the result is mostly a filled rectangle
   boxed_logo        the mark sits inside a filled box
-  knockout_detail   the logo relies on white shapes over colour; made one colour,
-                    that detail disappears
+  knockout_detail   white shapes over colour that could not be cut out; made one
+                    colour, that detail disappears
   empty             nothing left after background removal
   low_resolution    too small to render sharp at twice the slot size
+Knockouts (white letters or shapes painted over colour, like a badge) are cut out
+automatically, the way a brand prints its logo in one colour: the white becomes
+transparent. Such candidates carry the note `knockout_cut`.
+
 Non-blocking notes (they rank a candidate down, they don't rule it out):
+  knockout_cut      white parts were cut out (see above); check it reads right
+  detail_lost       colours that touch each other (a pin on a disc, triangles in a
+                    symbol) merge into one shape in one colour; pick it only if the
+                    one-colour preview still reads as the logo
+  boxed             the logo is a filled box with the name cut out of it; prefer an
+                    unboxed version when the company has one
   stacked           (wordmark) symbol-over-name layout, weak next to Augusta's
                     one-line logo; use it only when no horizontal version exists
   not_square        (mark) the company's standard logo, not a square symbol; the
@@ -41,16 +51,20 @@ Run with uv, which installs the dependencies above on first use (and Chromium, o
   uv run logos.py ...
 
 Usage:
-  logos.py collect --kind wordmark --domain acme.com --out <dir> [--extra URL_OR_FILE ...]
-  logos.py collect --kind mark --domain acme.com --out <dir> [--extra ...]
+  logos.py collect --run <run> --company "Acme" --domain acme.com --kind wordmark|mark
+                   [--role client|fund|portco] [--extra FILE_URL ...] [--no-site]
       Finds candidates on the company's own site (rendered header logo, schema.org
-      logo, apple-touch icon, icons, favicon) plus any --extra sources, cleans and
-      checks each, and writes <dir>/candidates.json and <dir>/sheet.png.
-      Run again with more --extra sources to append; numbering continues.
-      --no-site skips the site scan (extras only).
-  logos.py pick <dir> <n> [--accept FLAG ...] [--reason "..."]
-      Records candidate n as the logo: <dir>/logo.png (+ logo.svg when vector)
-      and <dir>/choice.json. Refuses a blocking flag unless it is accepted.
+      logo, apple-touch icon, icons, favicon) plus any --extra file URLs, cleans and
+      checks each, and writes <run>/logos/<company>-<kind>/candidates.json + sheet.png.
+      Run again with more --extra (and --no-site) to append; numbering continues and
+      failed downloads are retried.
+  logos.py pick <dir> <n> --reason "..." [--accept low_resolution]
+      Records candidate n: <dir>/logo.png (+ logo.svg when vector) and choice.json,
+      with the confidence worked out. Only low_resolution can be accepted.
+  logos.py none <dir> --reason "..."
+      Records that no acceptable logo exists (the deck keeps its placeholder).
+  logos.py report --run <run>
+      Writes <run>/logos/logos.json from every pick / none.
 """
 from __future__ import annotations
 
@@ -61,6 +75,9 @@ import io
 import json
 import re
 import shutil
+import time
+import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -78,7 +95,11 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 MAX_DOWNLOAD = 8 * 1024 * 1024
 RENDER_PX = 1200            # long side of SVG renders used for checks and logo.png
 KEY_LO, KEY_HI = 18.0, 70.0  # background key ramp (max channel distance)
-BUSY_BORDER_STD = 22.0
+# busy background: share of the border that is far from the background colour. A photo or
+# gradient backdrop is far all round; JPEG noise or a mark touching the edge is not.
+BUSY_BORDER_SHARE = 0.25
+BUSY_BORDER_DIST = 40
+BUSY_BORDER_TONES = 12
 SOLID_FILL = 0.82
 BOX_EDGE_FILL = 0.9
 TRIM_ALPHA = 10
@@ -89,7 +110,7 @@ MARGIN = 0.02
 # must stay sharp at 2x.
 MIN_WORDMARK_H = 110
 MIN_MARK_SIDE = 54
-MARK_ASPECT = (0.75, 1.33)
+MARK_ASPECT = (0.6, 1.67)      # fits the square tile; wider/taller is a wordmark
 STACKED_BELOW = 1.5
 BLOCKING = {"busy_background", "solid_block", "boxed_logo", "knockout_detail",
             "empty", "low_resolution", "download_failed", "not_an_image"}
@@ -171,6 +192,8 @@ SCAN_JS = r"""(company) => {
     // page imagery is never a logo candidate: it must be labelled as a logo / the company
     // or link home, and be logo-sized
     if ((!home && !named) || r0.width > 600 || r0.height > 250) return 0;
+    // small UI icons (arrows, search, menu) sit in headers and home links too
+    if (!w.includes('logo') && r0.width < 40 && r0.height < 40) return 0;
     if (/linkedin|facebook|instagram|youtube|twitter|spotify|apple|google|podcast|tiktok|x-logo|social/.test(w + ' ' + (el.getAttribute('src') || ''))) return 0;
     if (!home && !w.includes('logo') && !inHeader(el) && r0.top > 250) return 0;   // a name alone counts only up top
     let s = 0;
@@ -281,8 +304,8 @@ def scan_site(domain: str, company: str, kind: str) -> list[dict]:
 
 def direct_url(url: str) -> str:
     """A Wikimedia/Wikipedia `File:` page -> the file itself."""
-    m = re.match(r"https?://[^/]*wiki[mp]edia\.org/wiki/(?:File|Ficheiro|Archivo|Datei):(.+)", url)
-    return f"https://commons.wikimedia.org/wiki/Special:FilePath/{m.group(1)}" if m else url
+    m = re.match(r"https?://([^/]*wiki[mp]edia\.org)/wiki/(?:File|Ficheiro|Archivo|Datei|Fichier):(.+)", url)
+    return f"https://{m.group(1)}/wiki/Special:FilePath/{m.group(2)}" if m else url
 
 
 def fetch(src: str) -> bytes:
@@ -293,8 +316,15 @@ def fetch(src: str) -> bytes:
         head, _, body = src.partition(",")
         return base64.b64decode(body) if ";base64" in head else urllib.parse.unquote(body).encode()
     req = urllib.request.Request(direct_url(src), headers={"User-Agent": UA, "Accept": "image/*,*/*;q=0.5"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = r.read(MAX_DOWNLOAD + 1)
+    for wait in (3, 8, 20, None):          # rate limits (Wikimedia answers 429): back off, retry
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = r.read(MAX_DOWNLOAD + 1)
+            break
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or wait is None:
+                raise
+            time.sleep(int(e.headers.get("Retry-After") or wait))
     if len(data) > MAX_DOWNLOAD:
         raise ValueError("larger than 8 MB")
     if data[:4] == b"PK\x03\x04":
@@ -348,11 +378,30 @@ def svg_viewbox(svg: bytes):
     return (0.0, 0.0, w, h) if w and h else None
 
 
+_KNOWN_NS = {"xlink": "http://www.w3.org/1999/xlink", "xml": None}
+
+
+def fix_namespaces(data: bytes) -> bytes:
+    """Inline SVGs lifted from a page often use prefixes (xlink:href, sketch:type ...)
+    without declaring them, which XML parsers refuse. Declare xlink; drop the rest."""
+    text = data.decode("utf-8", "replace")
+    used = set(re.findall(r"[\s<]([A-Za-z][\w-]*):[A-Za-z][\w-]*\s*=", text)) - {"xmlns"}
+    for pre in used:
+        if f"xmlns:{pre}=" in text or pre == "xml":
+            continue
+        if pre in _KNOWN_NS:
+            text = re.sub(r"<svg\b", f'<svg xmlns:{pre}="{_KNOWN_NS[pre]}"', text, count=1)
+        else:
+            text = re.sub(rf"\s{pre}:[\w-]+\s*=\s*(\"[^\"]*\"|'[^']*')", "", text)
+    return text.encode()
+
+
 def clean_svg(data: bytes) -> tuple[bytes, Image.Image | None, list[str], str]:
     """Remove full-canvas background shapes, trim the viewBox to the ink.
     Returns (svg bytes, render, problems, background note)."""
     ET.register_namespace("", SVG_NS)
     ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
+    data = fix_namespaces(data)
     root = ET.fromstring(data)
     problems, note = [], "transparent"
     vb = svg_viewbox(data)
@@ -451,8 +500,11 @@ def clean_raster(data: bytes) -> tuple[Image.Image, list[str], str]:
     else:
         opaque = [p for p in border if p[3] >= 30]
         bg = tuple(sorted(c[i] for c in opaque)[len(opaque) // 2] for i in range(3))
-        spread = max((sum((c[i] - bg[i]) ** 2 for c in opaque) / len(opaque)) ** 0.5 for i in range(3))
-        if spread > BUSY_BORDER_STD:
+        far = [c for c in opaque if max(abs(c[i] - bg[i]) for i in range(3)) > BUSY_BORDER_DIST]
+        # A mark that bleeds to the edge also puts colour on the border, but only its own
+        # few flat colours; a photo or gradient backdrop brings many.
+        tones = {tuple(v // 32 for v in c[:3]) for c in far}
+        if len(far) / len(opaque) > BUSY_BORDER_SHARE and len(tones) > BUSY_BORDER_TONES:
             problems.append("busy_background")
         alpha = _key_out(rgba, bg)
         note = "#%02x%02x%02x removed" % bg
@@ -478,6 +530,76 @@ def _edge_fill(mask: Image.Image) -> float:
     edge = [px[x, y0 + i] for x in range(x0, x1)] + [px[x, y1 - 1 - i] for x in range(x0, x1)]
     edge += [px[x0 + i, y] for y in range(y0, y1)] + [px[x1 - 1 - i, y] for y in range(y0, y1)]
     return sum(1 for v in edge if v) / len(edge)
+
+
+def cut_knockouts(im: Image.Image) -> tuple[Image.Image, bool]:
+    """White shapes painted over colour (letters in a badge, bars in a circle) become
+    transparent, so the logo survives being made one colour. White that is set apart
+    from the colour (a white tagline on transparency) is left alone."""
+    import numpy as np
+    from scipy import ndimage
+
+    a = np.asarray(im.convert("RGBA")).copy()
+    opaque = a[..., 3] > 200
+    lo = a[..., :3].min(axis=2)
+    white = opaque & (lo > 235)
+    colour = opaque & (lo <= 200)
+    if white.sum() < 0.02 * opaque.sum() or colour.sum() < 0.10 * opaque.sum():
+        return im, False
+    labels, n = ndimage.label(white, structure=np.ones((3, 3)))
+    if not n:
+        return im, False
+    cut = np.zeros_like(white)
+    for i, sl in enumerate(ndimage.find_objects(labels), start=1):
+        y0, y1 = max(sl[0].start - 2, 0), sl[0].stop + 2
+        x0, x1 = max(sl[1].start - 2, 0), sl[1].stop + 2
+        comp = labels[y0:y1, x0:x1] == i
+        ring = ndimage.binary_dilation(comp, iterations=2) & ~comp
+        if not ring.any():
+            continue
+        on_colour = (colour[y0:y1, x0:x1] & ring).sum() / ring.sum()
+        if on_colour > 0.5:
+            cut[y0:y1, x0:x1] |= comp
+    if not cut.any():
+        return im, False
+    # take the anti-aliased light edge with it
+    edge = ndimage.binary_dilation(cut, iterations=2) & (lo > 200)
+    a[cut | edge, 3] = 0
+    return Image.fromarray(a, "RGBA"), True
+
+
+def detail_lost(im: Image.Image) -> bool:
+    """Share of the logo's drawing that is colour-against-colour. Made one colour, those
+    borders vanish: a pin on a disc becomes a dot, a tri-colour symbol a solid block.
+    Gradients change gently and don't count; only hard borders between colours do."""
+    import numpy as np
+    from scipy import ndimage
+
+    small = im.copy()
+    small.thumbnail((400, 400))
+    a = np.asarray(small.convert("RGBA")).astype(int)
+    opaque = a[..., 3] > 200
+    if opaque.sum() < 50:
+        return False
+    rgb = a[..., :3]
+    # hard colour borders inside the ink
+    dx = np.abs(rgb[:, 1:] - rgb[:, :-1]).max(axis=2) > 70
+    dy = np.abs(rgb[1:] - rgb[:-1]).max(axis=2) > 70
+    inner = np.zeros(opaque.shape, bool)
+    inner[:, 1:] |= dx & opaque[:, 1:] & opaque[:, :-1]
+    inner[1:] |= dy & opaque[1:] & opaque[:-1]
+    inner &= ndimage.binary_erosion(opaque, iterations=2)   # not the outline's anti-aliasing
+    outline = opaque & ~ndimage.binary_erosion(opaque)
+    # judged per shape: a small tri-colour symbol next to a long wordmark still counts
+    labels, n = ndimage.label(ndimage.binary_dilation(opaque, iterations=1))
+    total = opaque.sum()
+    for i in range(1, n + 1):
+        comp = labels == i
+        if (comp & opaque).sum() < 0.03 * total:
+            continue
+        if (inner & comp).sum() > 0.25 * max((outline & comp).sum(), 1):
+            return True
+    return False
 
 
 def check(im: Image.Image, kind: str, vector: bool) -> tuple[list[str], float]:
@@ -512,6 +634,8 @@ def check(im: Image.Image, kind: str, vector: bool) -> tuple[list[str], float]:
         n_edge = ImageStat.Stat(edge).sum[0] / 255
         if n_edge and ImageStat.Stat(ImageChops.multiply(edge, near)).sum[0] / 255 / n_edge > 0.3:
             problems.append("knockout_detail")
+    if detail_lost(im):
+        problems.append("detail_lost")
     if not vector:
         if kind == "wordmark" and im.height < MIN_WORDMARK_H:
             problems.append("low_resolution")
@@ -558,24 +682,40 @@ def process(src: dict, n: int, kind: str, cdir: Path) -> dict:
         entry.update(problems=["not_an_image"], error=f"{type(e).__name__}: {e}"[:160])
         return entry
     if im is not None and "empty" not in problems:
+        im, was_cut = cut_knockouts(im)
+        if was_cut:
+            # the cut exists only as pixels: the PNG (rendered large) is the file to use
+            problems.append("knockout_cut")
+            if vector:
+                entry.pop("svg", None)
+                stem.with_suffix(".svg").unlink(missing_ok=True)
         im.save(stem.with_suffix(".png"))
         entry["png"] = str(stem.with_suffix(".png"))
-        more, aspect = check(im, kind, vector)
+        more, aspect = check(im, kind, vector and not was_cut)
+        if was_cut and "boxed_logo" in more:
+            # a filled box with the name cut out is a legitimate reversed logo
+            more = ["boxed" if m == "boxed_logo" else m for m in more if m != "solid_block"]
         problems = list(dict.fromkeys(problems + more))
         entry.update(aspect=aspect, size=list(im.size))
     entry.update(format=fmt, vector=vector, background=note, problems=problems)
     return entry
 
 
-def collect(kind: str, out: Path, domain: str | None, company: str, extras: list[str], site: bool) -> list[dict]:
+def collect(kind: str, out: Path, domain: str | None, company: str, extras: list[str], site: bool,
+            role: str = "") -> list[dict]:
     cdir = out / "candidates"
     cdir.mkdir(parents=True, exist_ok=True)
     path = out / "candidates.json"
     entries = json.loads(path.read_text()) if path.exists() else []
-    known = {e["source"] for e in entries}
+    # a failed download can be retried: only sources that worked count as known
+    known = {e["source"] for e in entries if not e.get("error")}
     sources = []
     if site and domain:
-        sources += scan_site(domain, company, kind)
+        found = scan_site(domain, company, kind)
+        if not found:
+            print("WARNING: the site scan found no candidates (the site may block automated browsers)."
+                  " Go to step 4: add sources with --extra.")
+        sources += found
     sources += [{"origin": "extra", ("url" if x.startswith(("http", "data:")) else "file"): x} for x in extras]
     n = max([e["n"] for e in entries] + [0])
     for src in sources:
@@ -586,8 +726,10 @@ def collect(kind: str, out: Path, domain: str | None, company: str, extras: list
         n += 1
         entries.append(process(src, n, kind, cdir))
     path.write_text(json.dumps(entries, indent=1) + "\n")
-    (out / "meta.json").write_text(json.dumps({"kind": kind, "company": company, "domain": domain}, indent=1) + "\n")
-    sheet(entries, kind, out / "sheet.png")
+    (out / "meta.json").write_text(json.dumps({"company": company, "role": role, "kind": kind, "domain": domain},
+                                              indent=1, ensure_ascii=False) + "\n")
+    if not sheet(entries, kind, out / "sheet.png"):
+        print("WARNING: no usable candidate yet, so no sheet. Add sources with --extra.")
     return entries
 
 
@@ -621,7 +763,7 @@ def sheet(entries: list[dict], kind: str, out: Path) -> Path | None:
             slot = ("<div class='cell dark'>"
                     + (f"<img src='{aug}' style='height:40px'>" if aug else "<span>Augusta Labs</span>")
                     + "<div class='div'></div>"
-                    f"<img src='{src}' class='white' style='max-height:40px;max-width:186px;object-fit:contain'></div>")
+                    f"<div class='slotbox'><img src='{src}' class='white'></div></div>")
         else:
             slot = (f"<div class='cell light'><div class='tile'><img src='{src}' class='ink'"
                     " style='max-width:27px;max-height:27px'></div>"
@@ -631,18 +773,20 @@ def sheet(entries: list[dict], kind: str, out: Path) -> Path | None:
     if not rows:
         return None
     page_html = f"""<html><head><style>
-      body{{margin:0;padding:16px;font:12px -apple-system,Helvetica,sans-serif;background:#f4f4f5;width:1180px}}
+      body{{margin:0;padding:16px;font:12px -apple-system,Helvetica,sans-serif;background:#f4f4f5;width:1300px}}
       .row{{display:flex;gap:12px;align-items:center;margin-bottom:10px}}
       .meta{{width:330px;color:#27272a;overflow-wrap:anywhere}}
       .cell{{width:400px;height:110px;display:flex;align-items:center;justify-content:center;gap:16px;border-radius:8px}}
-      .dark{{background:#020202}} .grey{{background:#dcdce0}} .light{{background:#F9F9F9;border:1px solid #E5E7F0}}
-      .div{{width:3px;height:44px;background:#464646;flex-shrink:0}} .dark img{{flex-shrink:0}} .dark span{{color:#fff;font-size:20px}}
+      .dark{{background:#020202;width:500px}} .grey{{background:#dcdce0}} .light{{background:#F9F9F9;border:1px solid #E5E7F0}}
+      .div{{width:3px;height:44px;background:#464646;flex-shrink:0}} .dark img{{flex-shrink:0}}
+      .slotbox{{width:186px;height:40px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0}}
+      .slotbox img{{max-width:100%;max-height:100%;object-fit:contain}} .dark span{{color:#fff;font-size:20px}}
       .white{{filter:brightness(0) invert(1)}} .ink{{filter:brightness(0);opacity:.85}}
       .tile{{width:42px;height:42px;background:#fff;border:1px solid #E5E7F0;border-radius:10px;
              display:flex;align-items:center;justify-content:center}}
       .tile.big{{width:90px;height:90px;border-radius:21px}}
     </style></head><body>{''.join(rows)}</body></html>"""
-    page = Browser.page(viewport={"width": 1212, "height": 200})
+    page = Browser.page(viewport={"width": 1332, "height": 200})
     try:
         page.set_content(page_html, wait_until="networkidle", timeout=30000)
         page.screenshot(path=str(out), full_page=True)
@@ -653,12 +797,26 @@ def sheet(entries: list[dict], kind: str, out: Path) -> Path | None:
 
 # ---------------------------------------------------------------- pick
 
+ACCEPTABLE = {"low_resolution"}      # the only blocking flag a pick may accept
+
+
+def _official(source: str, origin: str, domain: str | None) -> bool:
+    if origin.startswith("site-") or origin in ("schema-logo", "apple-touch-icon", "mask-icon", "icon", "favicon"):
+        return True
+    host = urllib.parse.urlparse(source).hostname or ""
+    d = (domain or "").lower().removeprefix("https://").removeprefix("http://").removeprefix("www.").split("/")[0]
+    return bool(d) and (host == d or host.endswith("." + d))
+
+
 def pick(out: Path, n: int, accept: set[str], reason: str) -> dict:
     entries = {e["n"]: e for e in json.loads((out / "candidates.json").read_text())}
     meta = json.loads((out / "meta.json").read_text()) if (out / "meta.json").exists() else {}
     if n not in entries:
         raise SystemExit(f"no candidate #{n}")
     e = entries[n]
+    if accept - ACCEPTABLE:
+        raise SystemExit(f"only {', '.join(sorted(ACCEPTABLE))} can be accepted; "
+                         f"{', '.join(sorted(accept - ACCEPTABLE))} means the logo breaks on the slide")
     blocking = [p for p in e.get("problems", []) if p in BLOCKING and p not in accept]
     if blocking or not e.get("png"):
         raise SystemExit(f"candidate #{n} is not usable: {', '.join(blocking) or e.get('error', 'no file')}"
@@ -666,14 +824,53 @@ def pick(out: Path, n: int, accept: set[str], reason: str) -> dict:
     shutil.copy(e["png"], out / "logo.png")
     if e.get("svg"):
         shutil.copy(e["svg"], out / "logo.svg")
-    choice = {**meta, "n": n, "source": e["source"], "origin": e["origin"],
+    notes = [p for p in e.get("problems", []) if p not in BLOCKING]
+    accepted = sorted(set(e.get("problems", [])) & accept)
+    official = _official(e["source"], e["origin"], meta.get("domain"))
+    lowering = [x for x in notes if x != "knockout_cut"]      # a clean cut is the normal treatment
+    confidence = "high" if official and not accepted and not lowering else "medium"
+    choice = {**meta, "n": n, "source": e["source"], "origin": e["origin"], "confidence": confidence,
               "file": str(out / ("logo.svg" if e.get("svg") else "logo.png")),
               "png": str(out / "logo.png"), "aspect": e.get("aspect"),
-              "accepted": sorted(set(e.get("problems", [])) & accept),
-              "notes": [p for p in e.get("problems", []) if p not in BLOCKING],
-              "reason": reason}
+              "accepted": accepted, "notes": notes,
+              "reason": reason + ("" if official else " (third-party source)")}
     (out / "choice.json").write_text(json.dumps(choice, indent=1) + "\n")
+    (out / "none.json").unlink(missing_ok=True)
     return choice
+
+
+def none(out: Path, reason: str) -> dict:
+    """Record that no acceptable logo exists: the deck keeps its placeholder."""
+    meta = json.loads((out / "meta.json").read_text()) if (out / "meta.json").exists() else {}
+    rec = {**meta, "none": reason}
+    (out / "none.json").write_text(json.dumps(rec, indent=1) + "\n")
+    (out / "choice.json").unlink(missing_ok=True)
+    return rec
+
+
+def report(run: Path) -> Path:
+    """Assemble <run>/logos/logos.json from every entry's choice.json / none.json."""
+    rows = []
+    for d in sorted((run / "logos").iterdir()):
+        for name in ("choice.json", "none.json"):
+            f = d / name
+            if f.exists():
+                r = json.loads(f.read_text())
+                keep = ("company", "role", "kind", "n", "origin", "file", "png", "aspect", "source",
+                        "confidence", "notes", "reason", "none")
+                rows.append({k: r[k] for k in keep if k in r})
+    missing = [d.name for d in (run / "logos").iterdir() if d.is_dir()
+               and not (d / "choice.json").exists() and not (d / "none.json").exists()]
+    if missing:
+        print("WARNING: no pick and no none for: " + ", ".join(missing))
+    out = run / "logos" / "logos.json"
+    out.write_text(json.dumps(rows, indent=1, ensure_ascii=False) + "\n")
+    return out
+
+
+def slug(company: str) -> str:
+    s = unicodedata.normalize("NFKD", company).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def main():
@@ -681,25 +878,38 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("collect")
     c.add_argument("--kind", choices=["wordmark", "mark"], required=True)
-    c.add_argument("--out", required=True)
+    c.add_argument("--run", required=True, help="the deck run folder; files go to <run>/logos/<company>-<kind>")
     c.add_argument("--domain")
-    c.add_argument("--company", default="")
+    c.add_argument("--company", required=True)
+    c.add_argument("--role", default="", choices=["", "client", "fund", "portco"])
     c.add_argument("--extra", nargs="*", default=[])
     c.add_argument("--no-site", action="store_true")
     p = sub.add_parser("pick")
     p.add_argument("dir")
     p.add_argument("n", type=int)
-    p.add_argument("--accept", nargs="*", default=[])
-    p.add_argument("--reason", default="")
+    p.add_argument("--accept", nargs="*", default=[], choices=sorted(ACCEPTABLE))
+    p.add_argument("--reason", required=True)
+    no = sub.add_parser("none")
+    no.add_argument("dir")
+    no.add_argument("--reason", required=True)
+    r = sub.add_parser("report")
+    r.add_argument("--run", required=True)
     a = ap.parse_args()
     try:
         if a.cmd == "collect":
-            for e in collect(a.kind, Path(a.out), a.domain, a.company, a.extra, not a.no_site):
+            out = Path(a.run) / "logos" / f"{slug(a.company)}-{a.kind}"
+            for e in collect(a.kind, out, a.domain, a.company, a.extra, not a.no_site, a.role):
                 state = ", ".join(e.get("problems") or []) or "ok"
                 print(f"#{e['n']:<3} {e['origin']:<18} {state:<34} {e['source'][:70]}")
-            print(f"sheet: {Path(a.out) / 'sheet.png'}")
-        else:
+            print(f"dir:   {out}")
+            if (out / "sheet.png").exists():
+                print(f"sheet: {out / 'sheet.png'}")
+        elif a.cmd == "pick":
             print(json.dumps(pick(Path(a.dir), a.n, set(a.accept), a.reason), indent=1))
+        elif a.cmd == "none":
+            print(json.dumps(none(Path(a.dir), a.reason), indent=1))
+        else:
+            print(report(Path(a.run)))
     finally:
         Browser.close()
 
