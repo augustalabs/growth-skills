@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deck Case Picker"
+  short_description: "Pick the case studies that fit this company"
+  default_prompt: "Use $deck-case-picker to pick the case studies for this deck."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deck Research"
+  short_description: "Research a company or fund with verified, current facts"
+  default_prompt: "Use $deck-research to research this company for the deck."
