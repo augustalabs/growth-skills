@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deck · Discovery PE"
+  short_description: "Build a PE discovery deck from a Deck Tracker request"
+  default_prompt: "Use $deck-discovery-pe to build the deck for this Deck Tracker request."
