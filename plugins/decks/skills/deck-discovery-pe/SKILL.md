@@ -47,6 +47,7 @@ You build one discovery deck for a private-equity fund, on your own, from a Deck
 | The whole slide list, in deck order | The **Full Database of Slides** table at the end of the mapping page. Query it in view mode: every slide of the deck in order, with Class, Appears when and the artboard link. This is the list the plan is built from; the group tables show the same slides next to their group's rules. |
 | What each slide says and its rules | Each slide's Notion page, i.e. the row's page in the Slides view |
 | The design | Paper template file `01M39QHGZGA5T0P7M5JGN5PM2P` (Discovery PE); each slide row links to its artboard in `Discovery PE · Artboard` |
+| The Thank-you contact | **Sales Reps** database `collection://f2e29b88-ef48-4e19-a8cc-c5b4bd63d703` (under decks master): name, title, email, phone, and every Notion account the person uses. Match the row's `Send to` user id against `Notion account`; an Active match goes on the slide as `<Name>` / `<Title>, Augusta Labs` / email / phone. `Send to` empty → João Cerejeira. `Send to` set but no Active match → stop (Blocked) and report the id; never put someone else on the slide. |
 | Research, logos, case studies | Skills `deck-research`, `deck-logos`, `deck-case-picker` in Growth Skills (pull them fresh) |
 
 Never copy content from these into your own head as "the usual". Read them on every run: they change.
