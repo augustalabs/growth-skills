@@ -171,8 +171,9 @@ The Paper file is already an exact copy of the template (step 2). Nothing is reb
 
 **Then one build subagent per chapter page** (in parallel, one message). Each one gets its page id, its slides from the plan with their artboard ids, and these instructions:
 
-1. **Change content in place, never redraw:**
-   - set every text from the plan's content (`set_text_content`)
+1. **Change content in place, never redraw the slide:**
+   - plain text: set it from the plan's content (`set_text_content`)
+   - anything whose shape changes (a paragraph with bold words, a table with fewer rows, a list with more items): `get_jsx` that block, then rewrite it with `write_html` in `replace` mode, with the template's own styles, spacing and layout. It's HTML: write it cleanly, in flex, so it arranges itself.
    - replace every token (`<Fund>`, `ACME`, `[Industry Group]`, the date)
    - place the logos: upload each with `paper-asset://` from `logos/` into the logo's existing frame
    - place the case cards: swap the banner image on the existing card, and set its text fields
@@ -247,7 +248,14 @@ Report at every step in two places, always both, one plain sentence, e.g.:
 - <b>Slack </b>**`C0C20P1TTV4`** (#pitch-decks-bot-health), one thread per deck:
   - start: "\:hammer_and_wrench\: Building *\<Fund>* PE discovery deck — \<Notion row link>", and keep its `ts`
   - reply in that thread with each progress line
-  - finish: "\:eyes\: Ready for review — \<Paper link>" plus the PDF, broadcast to the channel
+  - finish: "\:eyes\: Ready for review — \<Paper link>", broadcast to the channel, then the PDF in the same thread:
+    1. `slack_get_file_upload_url` with the PDF's file name and its exact size in bytes (`stat -f %z`), taken after the final export
+    2. POST the raw bytes to the returned URL (`Content-Type: application/pdf`), keeping the URL byte for byte in a shell variable
+    3. `slack_complete_file_upload` with the file id, channel `C0C20P1TTV4`, the thread's `ts` and the Paper file name as title
+
+    <p>
+    If the upload fails, say so in the thread; the PDF is still on the Notion row.
+    </p>
   - failure: "\:red_circle\: Blocked at \<step>: \<short reason>", broadcast
   - the thread also carries the build notes: decisions and reasons, the portfolio companies and case studies picked, and what to check by eye
 

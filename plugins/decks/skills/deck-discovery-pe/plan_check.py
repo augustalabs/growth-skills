@@ -29,7 +29,7 @@ TOKENS = ["ACME", "<Fund>", "<Client>", "[Industry Group]", "<Industry Group>", 
 # A figure in authored text: money, percentages, multiples, "100M"-style amounts.
 # Case-card fields are copied from the case library and are exempt.
 FIGURE = re.compile(r"[€$£]\s?\d[\d.,]*\s?(?:M|bn|B|k|mil|milhões|million|billion)?"
-                    r"|\d[\d.,]*\s?(?:%|x\b|×|M\b|bn\b|B\b|k\b|mil\b|milhões|million|billion)",
+                    r"|(?<![A-Za-z\d.,])\d[\d.,]*\s?(?:%|x\b|×|M\b|bn\b|B\b|k\b|mil\b|milhões|million|billion)",
                     re.IGNORECASE)
 CASE_KEYS = {"case", "case_card", "card"}
 
