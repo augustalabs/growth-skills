@@ -178,7 +178,7 @@ The Paper file is already an exact copy of the template (step 2). Nothing is reb
    - replace every token (`<Fund>`, `ACME`, `[Industry Group]`, the date)
    - place the logos: upload each with `paper-asset://` from `logos/` into the logo's existing frame
    - place the case cards: swap the banner image on the existing card, and set its text fields
-2. **Remove** the `notion-tag` layer.
+2. **Remove** the `notion-tag` layer. <b>Never remove or cover a </b>**`link`**<b> layer</b> (a link box); if you rewrite the block under one, keep it on top and over the same area.
 3. **Check its own work:**
    - screenshot every artboard
    - compare it with the template artboard
@@ -210,6 +210,7 @@ Validation is your job, not a builder's and not another skill's. The builders ch
    `node export.mjs <paper-file-id> <run>/pdf --title "<Paper file name>"`
    </p>
 
+   - Links: Paper can't store hyperlinks, so the templates carry **link boxes**: invisible Text layers named `link` whose text is `link:<url>`, sized over the clickable area (the Annex's two reference rows, the co-founders' LinkedIn cards). The export turns each into a real link. Check every one is clickable in the PDF.
    - It reads every artboard straight from the Paper app, pages in order and artboards top to bottom, and renders them in Chrome with the TWK Lausanne font installed on the machine (`render.mjs`, in this skill). It takes seconds.
    - Never copy slide code by hand or through a subagent: that is slow and lets typos in.
    - Paper's own PDF export fails when called by Claude, so don't use it.
@@ -217,11 +218,11 @@ Validation is your job, not a builder's and not another skill's. The builders ch
 4. **Attach the PDF:**
    - `notion-create-file-upload` with the filename `Augusta-Labs-x-<Fund>-AI-Value-Creation.pdf` (PT: `Augusta-Labs-x-<Fund>-Criacao-de-Valor-com-IA.pdf`). Notion rewrites spaces, `×` and `|`, so keep the name to letters, digits and hyphens.
    - POST the file to the `upload_url` as multipart form field `file`, with every header it returned. The response must say `"status":"uploaded"`.
-   - put it in the row's Files & media as `{"type":"file_upload","file_upload":{"id":"<file_upload_id>"}}`
+   - put it in the row's **Deck PDF** property (replacing any older PDF; never in Files & media, which holds the request's own input files) as `{"type":"file_upload","file_upload":{"id":"<file_upload_id>"}}`
    - if the upload fails, retry once with a new upload; if it fails again, deliver without it and say so in `notes.md` and the Slack thread (the PDF goes to Slack either way).
 5. **Update the row:**
    - Deck Link: the Paper file URL
-   - Files & media: the PDF
+   - Deck PDF: the PDF
    - Status → `In Review`
    - Bot Progress: `Ready for review.`
 6. `notes.md` lists what a human should check by eye: logos, case photos, anything flagged `medium`, and anything validation fixed.

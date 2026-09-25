@@ -73,6 +73,11 @@ export function jsxToHtml(jsx) {
   // Template slides carry an invisible "notion:<page id> · …" tag for Claude; never ship it.
   html = html.replace(/<div\b[^>]*>\s*notion:[^<]*<\/div>/g, "");
   html = html.replace(/style=\{\{([\s\S]*?)\}\}/g, (_, body) => `style="${escAttr(styleToCss(body))}"`);
+  // Link boxes: Paper can't store links, so templates carry a transparent text layer whose
+  // text is `link:<url>` (or `link:#12` for slide 12), sized over the clickable area.
+  // Turn each into a real link covering the same box.
+  html = html.replace(/<div\b([^>]*)>\s*link:(\S+?)\s*<\/div>/g, (_, attrs, url) =>
+    `<a class="link-box" href="${escAttr(url.replace(/^#(\d+)$/, "#slide-$1"))}"${attrs}></a>`);
   // JSX drops the indentation and line breaks around text; HTML keeps them, and a
   // pre-wrap text box would show them. Apply the JSX rule: trim each line, drop blank ones.
   html = html.replace(/>([^<]*\n[^<]*)</g, (_, t) =>
@@ -125,6 +130,7 @@ ${fontLinks(deck.fonts)}
   /* Paper's "hug" boxes never shrink; Chrome would squeeze them in a tight flex row and,
      with overflow-wrap: anywhere, break words letter by letter. */
   [style*="width: max-content"] { flex-shrink: 0; }
+  .link-box { display: block; z-index: 2147483646; font-size: 0 !important; }
   .hit { position: absolute; display: block; z-index: 2147483647; }
   @media screen {
     body { background: #1a1a1a; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 40px 0; }

@@ -2,6 +2,7 @@
 // Export a whole Paper file to PDF in one command: pull every artboard's JSX straight from
 // the local Paper app (the same `paper mcp` relay Claude uses), then render with render.mjs.
 // No agent copies slide code by hand, so it takes seconds and the JSX is byte-exact.
+// Links come from the templates' link boxes (see render.mjs).
 //
 // Usage: node export.mjs <paper-file-id> <out-dir> [--title "Deck title"]
 //   Pages in the file's order; artboards on each page top to bottom, then left to right.
