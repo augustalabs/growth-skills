@@ -114,11 +114,9 @@ Gate script: `uv run plan_check.py <run>/plan.json --stage decisions|write|build
 ### 2. Research, and the empty deck (in parallel, one message)
 
 - **Research** (`deck-research`): fund profile and portfolio today, for the fund. This is the slowest step: start it first.
-- **Paper:**
-  - create the file
-  - add the `--font-sans` token (value `TWK Lausanne`)
-  - create the chapter pages
-  - record their ids in the plan
+- **Paper:** clone the template, never rebuild it.
+  - `create_file` with `cloneFileId` = the template file and `name` = the Paper file name. It takes about 10 seconds and gives an exact copy: every page, every artboard, the `--font-sans` token, the images.
+  - The clone keeps the template's node ids, so every artboard link in the mapping points to the same slide in the new file. Record the file id and the page ids in the plan.
 - **Logo** (`deck-logos`): the fund's wordmark (role fund).
 
 ### 3. Decisions
@@ -160,30 +158,31 @@ Case cards are copied from the case's tracker row fields (Card · Tag, KPI, Titl
 
 Then run `plan_check.py`.
 
-### 6. Build: one agent per chapter (in parallel, one message)
+### 6. Build: shape the clone, then one agent per chapter
 
-One build subagent per chapter page. Each one gets its page id, its slides from the plan, and these instructions:
+The Paper file is already an exact copy of the template (step 2). Nothing is rebuilt: you shape it, then the builders change content in place.
 
-1. **Copy each artboard from the template:**
-   - `get_jsx(inline-styles)` on the template artboard
-   - `create_artboard` on the new page, named and positioned per the naming rules
-   - `write_html` of the root's children, in order and in chunks
+**First, you shape the deck** (one pass, before the builders start):
 
-   <p>
-   Image URLs (`app.paper.design/file-assets/…`) work across files. Repeated slides are copied once per instance.
-   </p>
-2. **Change it per the plan:**
-   - set every text from the plan's content
+- **Delete** every artboard whose slide doesn't run (`delete_nodes`), e.g. the deep dives beyond the number you decided, or a whole chapter that doesn't run, and then its empty page.
+- **Duplicate** a slide that needs more instances than the template has (`duplicate_nodes`). The result maps every original node id to its copy, so the builder can edit the copy straight away. Name it with its instance label.
+- **Order and stack** the artboards per the naming rules (`move_nodes`, `update_styles` for position).
+- Write each slide's artboard id in the new file into the plan.
+
+**Then one build subagent per chapter page** (in parallel, one message). Each one gets its page id, its slides from the plan with their artboard ids, and these instructions:
+
+1. **Change content in place, never redraw:**
+   - set every text from the plan's content (`set_text_content`)
    - replace every token (`<Fund>`, `ACME`, `[Industry Group]`, the date)
-   - place the logos: upload each with `paper-asset://` from `logos/`
-   - place the case cards: the banner image from the case row, and its text fields
-3. **Remove** the `notion-tag` layer.
-4. **Check its own work:**
+   - place the logos: upload each with `paper-asset://` from `logos/` into the logo's existing frame
+   - place the case cards: swap the banner image on the existing card, and set its text fields
+2. **Remove** the `notion-tag` layer.
+3. **Check its own work:**
    - screenshot every artboard
    - compare it with the template artboard
    - no overflow, no orphan words, no leftover tokens, alignment kept
    - fix, then call `finish_working_on_nodes`
-5. Report back the artboard ids. Write them into the plan's `built`.
+4. Report back the artboard ids. Write them into the plan's `built`.
 
 Keep layout, sizes and styles from the template: you change content, not design. If text doesn't fit, shorten the text; never shrink or move the design.
 
@@ -204,11 +203,15 @@ Validation is your job, not a builder's and not another skill's. The builders ch
    Fix every failure in Paper (or send it back to that chapter's builder), then validate that slide again.
    </p>
 2. Read the deck once, top to bottom, as the partner would. Does chapter 3 feel written for this fund?
-3. **Export the PDF** with `render.mjs` (in this skill), which renders the deck in Chrome with the TWK Lausanne font installed on the machine. Paper's own PDF export fails on these templates and drops links, so don't use it.
-   - `get_jsx(inline-styles)` on every artboard, in deck order, saved to `<run>/pdf/slides/NN.jsx`
-   - write `<run>/pdf/deck.json` (title = the Paper file name, artboard 1920×1080, slides in order)
-   - `node render.mjs <run>/pdf`, which gives `deck.pdf` and `deck.html`
-   - check it: `pdffonts deck.pdf` lists only TWKLausanne, and a look at a few pages (`pdftoppm -r 40 -png`) shows every image and logo
+3. **Export the PDF** with one command, after the deck is final in Paper:
+   <p>
+   `node export.mjs <paper-file-id> <run>/pdf --title "<Paper file name>"`
+   </p>
+
+   - It reads every artboard straight from the Paper app, pages in order and artboards top to bottom, and renders them in Chrome with the TWK Lausanne font installed on the machine (`render.mjs`, in this skill). It takes seconds.
+   - Never copy slide code by hand or through a subagent: that is slow and lets typos in.
+   - Paper's own PDF export fails when called by Claude, so don't use it.
+   - check it: `pdffonts deck.pdf` lists only TWKLausanne, and a look at every page (`pdftoppm -r 40 -png`) shows all text, images and logos in place
 4. **Attach the PDF:**
    - `notion-create-file-upload` with the filename `Augusta-Labs-x-<Fund>-AI-Value-Creation.pdf` (PT: `Augusta-Labs-x-<Fund>-Criacao-de-Valor-com-IA.pdf`). Notion rewrites spaces, `×` and `|`, so keep the name to letters, digits and hyphens.
    - POST the file to the `upload_url` as multipart form field `file`, with every header it returned. The response must say `"status":"uploaded"`.

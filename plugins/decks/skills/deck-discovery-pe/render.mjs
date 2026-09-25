@@ -122,6 +122,9 @@ ${fontLinks(deck.fonts)}
   .slide:last-child { break-after: auto; }
   /* Paper omits the artboard's own size from get_jsx; the root must fill the slide. */
   .slide > :first-child { width: ${W}px !important; height: ${H}px !important; }
+  /* Paper's "hug" boxes never shrink; Chrome would squeeze them in a tight flex row and,
+     with overflow-wrap: anywhere, break words letter by letter. */
+  [style*="width: max-content"] { flex-shrink: 0; }
   .hit { position: absolute; display: block; z-index: 2147483647; }
   @media screen {
     body { background: #1a1a1a; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 40px 0; }
