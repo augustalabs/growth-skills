@@ -154,7 +154,7 @@ Case cards are copied from the case's tracker row fields (Card · Tag, KPI, Titl
 - **Numbers and impact (guideline):** say what changes for the company qualitatively, e.g. "faster close", "fewer manual checks", "reps spend their time selling". Avoid promising amounts like "€100M more EBITDA" or "30% lower cost".
   - The numbers that belong on a slide are the case cards' real metrics and sourced facts from research.
   - `plan_check.py` lists every figure it finds in written content for you to review. Keep a figure only if it's one of those.
-- **Language:** EN is written in English. PT is written natively in European Portuguese, following `deck-pt-voice`, and is never translated from an English draft.
+- **Language:** EN is written in **US English** (organization, prioritize, labor), and Augusta's context layer is always the **Kernel**, never "Brain". Case-card text stays exactly as in the tracker. PT is written natively in European Portuguese, following `deck-pt-voice`, and is never translated from an English draft.
 - **Parallel:** one writer subagent per deep dive, plus one for the thesis. Give each writer the thesis's workflow table, so IDs and names match across slides.
 
 Then run `plan_check.py`.
