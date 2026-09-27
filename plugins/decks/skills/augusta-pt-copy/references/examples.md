@@ -69,7 +69,7 @@ All "before" lines were shipped in Augusta decks. Use these to calibrate how far
 
 | Before | After |
 |---|---|
-| Março 03, 2026 | 3 de março de 2026 |
+| Março 03, 2026 | 3 de Março de 2026 |
 | € 7.000 / 35€ / €1.5k | 7 000 € / 35 € / 1,5 mil € |
 | x2.5 | 2,5× |
 | dashboards interativas | dashboards interativos |

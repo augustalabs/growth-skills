@@ -49,13 +49,10 @@ Augusta's Portuguese is deliberately mixed. Two rules decide it.
 
 ### Keep in English
 
-- **Section labels, eyebrows and slide headers**, all of them: Overview, Snapshot, Executive Summary, Case Studies, Timeline, Pricing, Way of Working, Next Steps, Long-Term Vision, Technical Overview… One language per label, never a mix ("Equipa & Pricing" is wrong). Headlines (the action title of a slide) and body copy are in Portuguese.
 - **Augusta names and roles**: Applied AI Lab, Kernel, Labs, Playbook, Value Foundation Sprint, AI Transformation Lead, Tech Lead, Forward-Deployed Engineers, Domain Advisors, Technical Advisors, Co-Founder, GTM Lead, Founding Team.
 - **People and investor types**: advisors, business angels, founders, PE-backed ("Rede de clínicas dentárias PE-backed").
 - **Business terms**: use case, workflow, business case, roadmap, pipeline, stakeholders, compliance, kick-off, go-live, handover, SteerCo, go/no-go, ROI, FTE, payback, churn, upsell, time-to-market, due diligence, data room, NAV, covenants, KPI, EBITDA, P&L, bottleneck, benchmark, follow-up, scoring, onboarding, back-office.
 - **Delivery and tech terms**: sprint, pod, dashboard, deployment, evals, guardrails, connectors, harness, runtime, stack, cloud, LLM, RAG, API, skills.
-
-When a label in an existing Portuguese deck has to go back to English, restore its original English meaning, not a different label: "O Destino" → "The Destination", not "Long-Term Vision". If you don't know the original, keep the Portuguese label and flag it.
 
 Technical, legal and regulatory terms from another country's system stay as they are when there is no exact Portuguese equivalent: TIN, W-8BEN-E, GIIN, FATCA, CRS stay in English. Never swap in a Portuguese concept that only looks similar (a US TIN is not a NIF).
 
@@ -65,11 +62,12 @@ Give each kept term one gender and use it everywhere: o use case, o workflow, o 
 
 ### Use Portuguese
 
+- **Every label is in Portuguese too**: eyebrows, chapter titles, section headers, table headers, small caps labels, pills, case-card tags, client labels and card titles ("Snapshot" → "Em resumo", "Next Steps" → "Próximos passos", "AI Value Creation for X" → "Criação de Valor com IA para a X", "CHALLENGES" → "DESAFIOS", "HEALTHCARE" → "SAÚDE"). Only Augusta names and roles, document titles and the keep-list terms stay in English. One language per label.
 - Plain words everyone uses: equipa, cliente, receita, custo, prazo, âmbito, entregáveis, reunião inicial, preço, taxa horária, governação, automatização, dimensão de mercado, doentes (or the client's own word, e.g. "pacientes" in aesthetic clinics), RH.
 - Augusta's service lines in Portuguese: **Redesenhar, Implementar, Operar**.
 - Metric label: **Taxa de Recontratação**.
 - **IA** for the concept in running text ("agentes de IA", "a IA reduz…"). **AI** only inside English names (Applied AI Lab, AI-native, AI Transformation Lead). Never mix both for the same thing on one slide.
-- These read naturally and are fine: vaga a vaga, agêntico, participadas, gestoras de private equity, casos de estudo inside a sentence (the label stays "Case Studies").
+- These read naturally and are fine: vaga a vaga, agêntico, participadas, gestoras de private equity, casos de estudo (also as a label: "Casos de estudo").
 
 ## Slop: cut it or rewrite it
 
@@ -85,7 +83,7 @@ This is bad in English and worse in Portuguese, because the tricks don't travel.
 - **English sales metaphors**: wedge, spine, flywheel, substrate, slice, the prize, north star, first-class citizens, "ao ritmo da fronteira". Use the plain meaning.
 - **Hollow phrases**: de ponta a ponta, à escala, desbloquear, potenciar, alavancar, sinergias, robusto, de classe mundial, "Estes são os próximos passos sugeridos na abordagem deste tema" (just "Próximos passos").
 - **English passive**: "Foi considerado que 35% da receita…" → "Assumimos que 35% da receita…"
-- **ALL-CAPS labels and tags**. Normal case; acronyms stay acronyms.
+- **ALL-CAPS in running copy.** Write normal case; where the design itself sets a label in capitals, keep the design.
 
 Verbless noun phrases are fine for diagnosing a problem ("Processo moroso, propenso a erro e dependente de uma pessoa.") but not for positioning Augusta, where they turn into an English skeleton without a verb.
 
@@ -115,7 +113,7 @@ Verbless noun phrases are fine for diagnosing a problem ("Processo moroso, prope
 
 - Money: 75 000 €, 706,5 M€, 2,5 mM€. Symbol after the number, space in thousands, decimal comma.
 - Multipliers and ranges: 2,5×, 18 a 25%, 10 a 15 mil € por semana.
-- Dates: 24 de outubro de 2025; months in lowercase; never US order.
+- Dates: 24 de Outubro de 2025 and, on slides, `Setembro de 2026`: **the month starts with a capital letter** (Augusta house style); never US order.
 - Small numbers in prose written out ("seis meses", "três vagas").
 - Headlines: sentence case, specific, ideally with a number ("Solução paga em 20 dias"). Generic headlines ("Do conceito ao impacto") are weak.
 
@@ -126,9 +124,9 @@ Read every line and check:
 - Would a Portuguese partner say this out loud to the client's CEO?
 - Do I need to know the English to understand it?
 - Any hybrid (English adjective or word order on a Portuguese noun)?
-- Anything over-translated that should be English (names, roles, labels, the keep list)?
+- Anything over-translated that should be English (Augusta names and roles, the keep list)?
 - Any slogan, triplet, gerund tail, inflated claim?
 - AI vs IA consistent? One gender per kept term? Dates and numbers in pt-PT format?
-- One language per label, and all labels in English?
+- One language per label, and all labels in Portuguese (only Augusta names and keep-list terms in English)?
 
 If a line fails, rewrite it from its meaning. More before/after pairs from real decks are in `references/examples.md`; read it when fixing a long existing deck or when unsure how far to rewrite.
