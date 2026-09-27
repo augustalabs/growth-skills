@@ -1,0 +1,4 @@
+interface:
+  display_name: "Augusta · pt-PT copy"
+  short_description: "Write or fix European Portuguese copy for Augusta decks and proposals"
+  default_prompt: "Use $augusta-pt-copy to write or fix this Portuguese copy."

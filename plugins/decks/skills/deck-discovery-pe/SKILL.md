@@ -48,7 +48,7 @@ You build one discovery deck for a private-equity fund, on your own, from a Deck
 | What each slide says and its rules | Each slide's Notion page, i.e. the row's page in the Slides view |
 | The design | Paper template file `01M39QHGZGA5T0P7M5JGN5PM2P` (Discovery PE); each slide row links to its artboard in `Discovery PE · Artboard` |
 | The Thank-you contact | **Sales Reps** database `collection://f2e29b88-ef48-4e19-a8cc-c5b4bd63d703` (under decks master): name, title, email, phone, and every Notion account the person uses. Match the row's `Send to` user id against `Notion account`; an Active match goes on the slide as `<Name>` / `<Title>, Augusta Labs` / email / phone. `Send to` empty → João Cerejeira. `Send to` set but no Active match → stop (Blocked) and report the id; never put someone else on the slide. |
-| Research, logos, case studies | Skills `deck-research`, `deck-logos`, `deck-case-picker` in Growth Skills (pull them fresh) |
+| Research, logos, case studies, Portuguese copy | Skills `deck-research`, `deck-logos`, `deck-case-picker` and `augusta-pt-copy` in Growth Skills (pull them fresh) |
 
 Never copy content from these into your own head as "the usual". Read them on every run: they change.
 
@@ -154,7 +154,7 @@ Case cards are copied from the case's tracker row fields (Card · Tag, KPI, Titl
 - **Numbers and impact (guideline):** say what changes for the company qualitatively, e.g. "faster close", "fewer manual checks", "reps spend their time selling". Avoid promising amounts like "€100M more EBITDA" or "30% lower cost".
   - The numbers that belong on a slide are the case cards' real metrics and sourced facts from research.
   - `plan_check.py` lists every figure it finds in written content for you to review. Keep a figure only if it's one of those.
-- **Language:** EN is written in **US English** (organization, prioritize, labor), and Augusta's context layer is always the **Kernel**, never "Brain". Case-card text stays exactly as in the tracker. PT is written natively in European Portuguese, following `deck-pt-voice`, and is never translated from an English draft.
+- **Language:** EN is written in **US English** (organization, prioritize, labor), and Augusta's context layer is always the **Kernel**, never "Brain". Case-card text stays exactly as in the tracker. PT is written natively in European Portuguese, following `augusta-pt-copy`: written from the meaning, never translated line by line from an English draft; section labels stay in English. Every PT writer and builder gets that skill in its brief, and you check every PT slide against its "Before handing it back" list.
 - **Parallel:** one writer subagent per deep dive, plus one for the thesis. Give each writer the thesis's workflow table, so IDs and names match across slides.
 
 Then run `plan_check.py`.
