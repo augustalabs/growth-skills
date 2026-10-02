@@ -7,11 +7,22 @@ Where a project's material lives and how to read and cite it.
 | Allowed | Not allowed |
 |---|---|
 | Files in the repos named in the tracker row's `Brain repo` and `Other repos` | The tracker's `Card ·` columns (old case-study copy) |
+| Fireflies call recordings about this client and project (see below) | |
 | The tracker row itself, for classification only: Client, Client label, Sector, Business function, Value driver, Engagement owner, Type, Case study title | Web search, the client's website, press |
 | | Your own knowledge of the client or the sector |
 | | Other clients' repos |
 
-The repos are the entirety of what exists. If it is not there, the field is empty.
+The repos and Fireflies are the entirety of what exists. If it is not there, the field is empty.
+
+## Fireflies
+
+Many calls never reach a repo. After inventorying the repos, search Fireflies for the client name and the project name (and obvious variants), and list every meeting found. Skip any meeting whose transcript is already in a repo (same date and title). For the rest:
+
+- Use the meeting summary to decide whether it matters, then read the transcript and cite the transcript.
+- Register each as a source with type `call-transcript (fireflies)`, the meeting date, the speakers, and `path: fireflies:<meeting id>`.
+- Use only meetings that are about this client. A pipeline review or internal meeting that merely mentions the client is cited only for the sentence that concerns it.
+- The same rules apply as for repo calls: sales calls describe what was proposed, not what was done; quotes need an unambiguous speaker.
+- Read only. Never rename, move, share or change the privacy of a meeting.
 
 ## Reading the repos
 
@@ -38,7 +49,8 @@ gh api repos/augustalabs/<repo>/tarball > repo.tar.gz
 - A linked repo may return 404 (deleted, renamed or no access). Carry on with what is readable and list the unreadable repos in the return note.
 - The same call is often filed under two or three folder names. Cite one.
 - Many summaries have no "Overview" heading; some calls have no summary file.
-- Transcripts with unlabelled or mislabelled speakers cannot supply an attributed quote. Quote only lines whose speaker is unambiguous.
+- Transcripts with unlabelled or mislabelled speakers cannot supply an attributed quote. Quote only lines whose speaker is unambiguous. Watch for calls where several people shared one device: every line carries one name.
+- Transcription garbles names ("Portalegre" becomes "Porto Alegre"). Search for likely variants, and do not correct a garbled name from your own knowledge.
 - Emails sometimes contain passwords or access codes. Never copy them.
 - A document whose cover date differs from the date it was sent is dated by its cover; say so in the source type.
 

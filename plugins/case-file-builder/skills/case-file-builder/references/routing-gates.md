@@ -8,7 +8,9 @@ Two states only: filled or empty.
 
 - **A number** (anything in section 6, 8.1 to 8.12, engagement weeks, scale figures in section 2) is filled when value, source and as-of date are present. Period and volume are recorded whenever the source states them; a number with no stated measurement window is still filled, and is graded `estimated`.
 - **A prose field** is filled when it holds at least one sentence that ends with a source id and date.
-- **A classification field** (sector, business function, value driver, owner) is filled when it holds a value from the Project Tracker row, cited as the tracker source with the date the row was read. `shape` is decided from the sources (SKILL.md step 6).
+- **A classification field** (sector, business function, value driver, owner) is filled when it holds a value from the Project Tracker row, cited as the tracker source with the date the row was read, or a `(proposed)` value chosen from the tracker's options and cited to the sources. The same goes for 1.4 title. `shape` is decided from the sources (SKILL.md step 6).
+
+An 8.1 figure is either a section 6 delta or a ratio or multiple the sources state as a measured or observed result (see "Stated ratios" in SKILL.md).
 
 A `delta` is written only when `before` and `after` are both filled, in the same unit. A different unit means no delta; never convert. The delta takes the lower of the two grades.
 
@@ -25,6 +27,8 @@ For each of sections 1 to 11, over the fields that apply to this project:
 
 Fields that are optional by the structure table ("Absent is fine", "Normally empty", "Every line optional", "Empty is normal") do not count against `present`: 6.n.validated_by, 8.3 lines, 8.9, 8.10, 8.12, 11.2.
 
+A section whose only filled fields are optional ones is `partial`, not `absent`.
+
 Section 1 counts the front-matter fields it prints: client, label, the three chips, owner, engagement, permissions, plus 1.4 title. Empty permissions make section 1 partial.
 
 ## Routing gates (12.2)
@@ -38,6 +42,8 @@ Each rung requires the one below it. A gate reads flags only.
 | One-pager | Everything in Half. 8.2 gross value present. Permissions recorded in front matter. Section 4 present. |
 | Flagship | Everything in One-pager. Two or more section 6 entries with before and after in the same unit. Every section 6 entry carries a value. Section 9 present, or a 10.2 demo recorded. Every headline grade measured or modelled. |
 
+- For the Flagship check, "two or more section 6 entries" means two distinct workflows. Several pairs for the same workflow count once.
+- For Half, a "second 8.1 figure" may be a second pair for the same workflow; say so in the return note.
 - `formats` = every rung passed, lowest to highest.
 - `verdict` = the highest rung passed, or `none` when Quarter fails.
 - `next_unlock` (12.3) = the first failed check of the rung above the verdict. It stays in the file; it has no tracker column.

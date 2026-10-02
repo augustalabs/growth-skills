@@ -88,7 +88,7 @@ systems: []
 updated:
 before: {unit: , value: , volume: , period: , as_of: , source: }
 after:  {unit: , value: , volume: , period: , as_of: , source: }
-delta:  {absolute: , pct: , direction: }      # productivity | efficiency
+delta:  {absolute: , pct: , direction: }      # productivity | efficiency | quality (model or target comparison)
 changed:
 rate:   {value: , type: , source: , as_of: }
 value:  {annual: , route: , cash: , capacity: , margin: }
