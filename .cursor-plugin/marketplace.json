@@ -13,6 +13,11 @@
       "description": "Complete an ad hoc Growth request end-to-end in one pass, produce the requested output, and log the finished work in the Augusta Labs Growth ad hoc requests database. Use when someone invokes this skill with a request to execute; do not use for ordinary task planning or status updates."
     },
     {
+      "name": "case-file-builder",
+      "source": "./plugins/case-file-builder",
+      "description": "Build the Case File (.md) for one Augusta project from its linked GitHub repos, following the Case Studies Gold Standard: fourteen sections, every fact sourced and dated, empty fields left empty and turned into asks. Use when asked to build, refresh or check the case file of a row in the Project Tracker; not for writing slides, cards or any case-study format, which are generated from the file later."
+    },
+    {
       "name": "decks",
       "source": "./plugins/decks",
       "description": "Skills synced from Notion."

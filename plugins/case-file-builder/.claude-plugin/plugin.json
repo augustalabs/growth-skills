@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "case-file-builder",
+  "description": "Build the Case File (.md) for one Augusta project from its linked GitHub repos, following the Case Studies Gold Standard: fourteen sections, every fact sourced and dated, empty fields left empty and turned into asks. Use when asked to build, refresh or check the case file of a row in the Project Tracker; not for writing slides, cards or any case-study format, which are generated from the file later.",
+  "version": "1.0.0",
+  "author": {
+    "name": "case-file-builder"
+  }
+}

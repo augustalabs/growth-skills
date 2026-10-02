@@ -1,0 +1,15 @@
+{
+  "source": "notion",
+  "syncedBy": "notion-skills-github-sync",
+  "layoutVersion": 1,
+  "notion": {
+    "env": "prod",
+    "pluginId": "3ed76b8e-5e31-81c7-a61e-ee738f9c8c1d",
+    "url": "https://www.notion.so/p/3ed76b8e5e3181c7a61eee738f9c8c1d",
+    "versionId": "052cf13dfbc119f32a78b531b0702825289febfdb6083e90052dab0c18c70aa4"
+  },
+  "plugin": {
+    "slug": "case-file-builder",
+    "name": "case-file-builder"
+  }
+}
