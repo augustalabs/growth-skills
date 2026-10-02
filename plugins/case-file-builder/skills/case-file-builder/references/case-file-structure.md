@@ -12,6 +12,7 @@ The fourteen sections and every key, what it holds, and the rule that governs it
 | 0 Front matter | engagement.weeks, modules, gates, start, end | The engagement line: 14 weeks, 3 modules, 2 gates. | Each field only if stated. Weeks are never computed from dates. |
 | 0 Front matter | permissions.nameable, logo, metric_quotable, metric_precision, quote_attribution, embargo | What may be shown, and at what precision. | Absent means fully anonymised, no quote. Never assumed. |
 | 0 Front matter | owner | The delivery owner who stands behind the numbers. | One person, named. Matches the tracker's Engagement owner. |
+| 0 Front matter | delivery_status | What the sources show: ongoing, delivered, accepted, or no delivery evidence. | Sourced. Flag any disagreement with the tracker's Project stage. |
 | 0 Front matter | sources[] (id, type, date, author) | Register of every dump item: Slack thread, SOW, voice note, document, demo link. | Every fact in the body points at one source id. |
 | 0 Front matter | coverage, verdict, headline_grades | Mirror of section 12 for scripts. | Generated. Never hand-edited. |
 | 1 Identity | 1.1 client | Who they are, in one line, and the anonymised form. | Real and label both present. |
@@ -32,8 +33,8 @@ The fourteen sections and every key, what it holds, and the rule that governs it
 | 5 Solution | 5.2 components[] | The named systems or agents, one line each. | Names only. Detail is section 9. |
 | 5 Solution | 5.3 how_it_ran | Modules, gates, intermediate deliverables. Two or three lines. | A brief, not a plan. |
 | 6 Workflows[] | 6.n.name, owner, systems[], updated | The workflow, who ran it, what it touched, when this entry last changed. One entry per workflow. | The record of truth for every number in the file. |
-| 6 Workflows[] | 6.n.before (unit, value, volume, period, as_of, source) | Baseline in its atomic unit, the volume that makes it priceable, the period the measurement covers, the date it was true. | A value without a period is empty. Captured before build, or the grade caps at estimated. |
-| 6 Workflows[] | 6.n.after (unit, value, volume, period, as_of, source) | Same unit and same period basis as before. | A different unit or period from before means empty. Never converted. |
+| 6 Workflows[] | 6.n.before (unit, value, volume, period, as_of, source) | Baseline in its atomic unit, the volume that makes it priceable, the period the measurement covers, the date it was true. | Filled when value, source and as-of date are stated; period and volume recorded when the source gives them. No stated measurement window, or not captured before build: graded estimated. |
+| 6 Workflows[] | 6.n.after (unit, value, volume, period, as_of, source) | Same unit and same period basis as before. | Same unit as before. A different unit means no delta. Never converted. |
 | 6 Workflows[] | 6.n.delta (absolute, pct, direction) | Before minus after in the unit; the ratio; and productivity (more output, same input) or efficiency (less input, same output). | Written only when both before and after are filled. Direction decides the claim and the price. |
 | 6 Workflows[] | 6.n.changed | What changed in the work: where agentic reasoning replaced human steps, what was combined. |  |
 | 6 Workflows[] | 6.n.rate (value, type, source, as_of) | Price per unit; whether fully-loaded labour, client tariff or other; who supplied it and when. | The rate source is a named person or document. |
@@ -54,6 +55,7 @@ The fourteen sections and every key, what it holds, and the rule that governs it
 | 8 Impact | 8.8 capacity (hours, destination) | Hours released and where they went. | Stated separately. Not a saving. |
 | 8 Impact | 8.9 ebitda (figure, framing, source, usable) | The client's own L3 framing where one exists, and whether it may be shown. | Theirs, verbatim. Never Augusta's. |
 | 8 Impact | 8.10 sponsor (ev, moic, irr) | L4 and L5 slots. | Held as direction. Normally empty. |
+| 8 Impact | 8.12 supporting[] (metric, value, context, source, as_of) | Sourced figures that are not a before/after pair: accuracy scores, minutes saved per day, share of cases handled. | Optional. Never feeds a gate. Printed with its context. |
 | 8 Impact | 8.11 measurement (before_window, after_window, run_rate_start, validated_by) | The periods each state was measured over, when the after-state began, and who on the client side accepted the numbers. | Run-rate start places the result in the hold period. |
 | 9 Technical | 9.1 architecture | Summary, at layer level. |  |
 | 9 Technical | 9.2 integrations[] | Systems connected, and how: API, staging table, file. |  |

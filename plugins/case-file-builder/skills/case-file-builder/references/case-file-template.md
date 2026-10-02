@@ -2,7 +2,7 @@
 
 Copy this skeleton exactly. Keep every heading and key, in this order, in every file. Fill a key only when the rules in `SKILL.md` allow it; otherwise leave the value blank (nothing after the colon). Never write "TBD", "n/a", "unknown" or "not provided" in sections 1 to 11.
 
-A sourced value is written as: `value [S3, 2026-05-12]` (source id, then the as-of date). Prose sentences end with their source the same way.
+A sourced value is written as: `value [S3, 2026-05-12]` (source id, then the as-of date). Prose sentences end with their source the same way. Inside YAML blocks, quote any string that carries a citation, and keep numbers bare with the source id in the `source` key. A date known only to the month is written `2025-10`.
 
 ````markdown
 ---
@@ -19,7 +19,7 @@ dates:
   created:
   last_updated:
   last_dump_received:
-engagement:
+engagement:                 # a value taken from a proposal or plan is followed by (planned)
   weeks:
   modules:
   gates:
@@ -33,6 +33,7 @@ permissions:                # every key blank = fully anonymised, no quote
   quote_attribution:
   embargo:
 owner:
+delivery_status:            # ongoing | delivered | accepted | no delivery evidence, with [S, date]
 tracker_page:               # Notion URL of the Project Tracker row
 sources:
   - id: S1
@@ -96,6 +97,7 @@ grade:                                          # measured | modelled | estimate
 ```
 
 ## 7 Initiatives
+<!-- single-workflow: write n/a on the next line and no blocks -->
 updated:
 ### 7.1 <initiative name>
 ```yaml
@@ -122,7 +124,7 @@ reconciles:
 ```
 ### 8.3 costs
 ```yaml
-fee:       {amount: , recurring: false, source: , as_of: }
+fee:       {amount: , recurring: false, source: , as_of: }   # one line per phase when there are several
 run:       {amount: , recurring: true,  source: , as_of: }
 adoption:  {amount: , recurring: true,  source: , as_of: }
 licence:   {amount: , recurring: true,  source: , as_of: }
@@ -165,6 +167,12 @@ before_window:
 after_window:
 run_rate_start:
 validated_by:
+```
+
+### 8.12 supporting
+<!-- sourced figures that are not a before/after pair; never feed a gate -->
+```yaml
+- {metric: , value: , context: , source: , as_of: }
 ```
 
 ## 9 Technical

@@ -26,6 +26,22 @@ gh api "repos/augustalabs/<repo>/contents/<path>" -H "Accept: application/vnd.gi
 
 List the tree first, then decide what to read. Large repos have hundreds of calls; read all summaries, then open transcripts for the calls that matter.
 
+For a large repo, download it once and work locally:
+
+```bash
+gh api repos/augustalabs/<repo>/tarball > repo.tar.gz
+```
+
+**Attachments hold most of the hard evidence.** Steerco decks, SOWs, business-case spreadsheets and reports sit under `emails/<thread>/attachments/` and in `documents/` and `imports/`. Convert PDF, pptx, docx and xlsx to text and read them; do not stop at email bodies and call summaries.
+
+**Things to expect:**
+- A linked repo may return 404 (deleted, renamed or no access). Carry on with what is readable and list the unreadable repos in the return note.
+- The same call is often filed under two or three folder names. Cite one.
+- Many summaries have no "Overview" heading; some calls have no summary file.
+- Transcripts with unlabelled or mislabelled speakers cannot supply an attributed quote. Quote only lines whose speaker is unambiguous.
+- Emails sometimes contain passwords or access codes. Never copy them.
+- A document whose cover date differs from the date it was sent is dated by its cover; say so in the source type.
+
 ## Repo layouts
 
 **Engagement (brain) repos**, the usual `Brain repo`:
